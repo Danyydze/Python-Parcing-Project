@@ -5,6 +5,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from weather_viewmodel import WeatherViewModel
 from weather_model import WeatherModel
 
+
 class WeatherView:
     def __init__(self, root, viewmodel):
         self.root = root
@@ -85,4 +86,3 @@ if __name__ == "__main__":
     viewmodel = WeatherViewModel(model)
     view = WeatherView(root, viewmodel)
     root.mainloop()
-
