@@ -15,7 +15,6 @@ class WeatherView:
         self.root.title("🌦 Прогноз погоды")
         self.root.geometry("850x700")
 
-        # Top frame
         frame_top = tk.Frame(self.root)
         frame_top.pack(pady=10)
 
@@ -23,22 +22,27 @@ class WeatherView:
         self.city_entry = tk.Entry(frame_top, width=30)
         self.city_entry.pack(side=tk.LEFT, padx=5)
 
+        tk.Label(frame_top, text="API:").pack(side=tk.LEFT, padx=(10,0))
+        self.api_var = tk.StringVar(value="weatherapi")
+        api_select = ttk.Combobox(frame_top, textvariable=self.api_var, state="readonly", width=15)
+        api_select['values'] = ("weatherapi", "openweathermap")
+        api_select.pack(side=tk.LEFT, padx=5)
+
         get_btn = tk.Button(frame_top, text="Получить погоду", command=self._on_get_weather)
         get_btn.pack(side=tk.LEFT, padx=5)
 
-        # Weather info
         self.weather_label = tk.Label(self.root, textvariable=self.vm.current_weather, 
-                                    justify="left", font=("Arial", 12))
+                                      justify="left", font=("Arial", 12))
         self.weather_label.pack(pady=10)
 
-        # Charts frame
         self.frame_chart = tk.Frame(self.root)
         self.frame_chart.pack(fill="both", expand=True, padx=10, pady=10)
 
     def _on_get_weather(self):
         city = self.city_entry.get()
+        api = self.api_var.get()
         if city:
-            self.vm.update_weather(city)
+            self.vm.update_weather(city, api)
             if self.vm.forecast_data is not None:
                 self._plot_forecast(self.vm.forecast_data)
 
@@ -46,7 +50,6 @@ class WeatherView:
         fig, axs = plt.subplots(2, 2, figsize=(10, 6))
         axs = axs.flatten()
 
-        # Temperature
         axs[0].plot(df["date"], df["temp_c"], marker='o', label="Температура")
         axs[0].plot(df["date"], df["feelslike_c"], marker='o', linestyle='--', label="Ощущается")
         axs[0].set_title("Температура (°C)")
@@ -55,11 +58,9 @@ class WeatherView:
         axs[1].plot(df["date"], df["temp_c"], marker='s', color='orange')
         axs[1].set_title("Средняя температура (°C)")
 
-        # Humidity
         axs[2].plot(df["date"], df["humidity"], marker='o', color='blue')
         axs[2].set_title("Влажность (%)")
 
-        # Wind
         axs[3].plot(df["date"], df["wind_kph"], marker='o', color='green')
         axs[3].set_title("Скорость ветра (kph)")
 
@@ -70,11 +71,9 @@ class WeatherView:
 
         plt.tight_layout()
 
-        # Clear previous chart
         for widget in self.frame_chart.winfo_children():
             widget.destroy()
 
-        # Embed chart
         canvas = FigureCanvasTkAgg(fig, master=self.frame_chart)
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
